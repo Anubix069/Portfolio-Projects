@@ -7,7 +7,7 @@ Through a series of analytical SQL queries, we explore demographic distributions
 
 Raw data : https://github.com/Anubix069/Portofolio-Projects/blob/main/sql/projects/project-01/raw_data/tuberculosis_xray_dataset.csv
 
-File in usable format for SQL analysis :
+File in usable format for SQL analysis : https://github.com/Anubix069/Portofolio-Projects/blob/main/sql/projects/project-01/raw_data/tuberculosis_xray.db
 
 
 ## Key Insights from the Analysis
@@ -22,8 +22,8 @@ File in usable format for SQL analysis :
  - **Presence of blood in sputum** is a strong TB indicator (affecting nearly half the patients)
 
 ## Tuberculosis Data Exploration
-  - Script for db creation :
-  
+  - Script for db creation : 
+https://github.com/Anubix069/Portofolio-Projects/blob/main/sql/projects/project-01/processed_data/DB%20creation%20for%20SQL.py
   - Script for Data Analysis :
 https://github.com/Anubix069/Portofolio-Projects/blob/main/sql/projects/project-01/processed_data/Script.sql
 
