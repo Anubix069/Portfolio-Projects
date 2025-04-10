@@ -7,9 +7,9 @@ Through a series of analytical SQL queries, we explore demographic distributions
 
 *Original source:* https://www.kaggle.com/datasets/miadul/tuberculosis-x-ray-dataset-synthetic/data
 
-*Raw data:* https://github.com/Anubix069/Portofolio-Projects/blob/main/sql/projects/project-01/raw_data/tuberculosis_xray_dataset.csv
+*Raw data:* https://github.com/Anubix069/Portfolio-Projects/blob/main/sql/projects/project-01/raw_data/tuberculosis_xray_dataset.csv
 
-*File in usable format for SQL analysis:* https://github.com/Anubix069/Portofolio-Projects/blob/main/sql/projects/project-01/raw_data/tuberculosis_xray.db
+*File in usable format for SQL analysis:* https://github.com/Anubix069/Portfolio-Projects/blob/main/sql/projects/project-01/raw_data/tuberculosis_xray.db
 
 
 ## Key Insights from the Analysis
@@ -25,9 +25,9 @@ Through a series of analytical SQL queries, we explore demographic distributions
 
 ## Tuberculosis Data Exploration
   - Script for db creation : 
-https://github.com/Anubix069/Portofolio-Projects/blob/main/sql/projects/project-01/processed_data/DB%20creation%20for%20SQL.py
+https://github.com/Anubix069/Portfolio-Projects/blob/main/sql/projects/project-01/processed_data/DB%20creation%20for%20SQL.py
   - Script for Data Analysis :
-https://github.com/Anubix069/Portofolio-Projects/blob/main/sql/projects/project-01/processed_data/Script.sql
+https://github.com/Anubix069/Portfolio-Projects/blob/main/sql/projects/project-01/processed_data/Script.sql
 
 ## Technologies Used
   - **SQL**
