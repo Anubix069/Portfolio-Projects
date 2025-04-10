@@ -1,5 +1,3 @@
-# Portofolio-Projects
-
 # Projet Tuberculosis X-ray Dataset
 
 ## Description
