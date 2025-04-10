@@ -6,6 +6,7 @@ This project demonstrates the use of Structured Query Language (SQL) to explore 
 Through a series of analytical SQL queries, we explore demographic distributions, symptom severity, historical health records, and lifestyle factors (e.g., smoking), drawing insights that could assist in the early detection and classification of tuberculosis cases.
 
 Raw data : https://github.com/Anubix069/Portofolio-Projects/blob/main/sql/projects/project-01/raw_data/tuberculosis_xray_dataset.csv
+
 File in usable format for SQL analysis :
 
 
