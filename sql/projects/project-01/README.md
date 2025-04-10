@@ -12,6 +12,4 @@ Assurez-vous d'avoir Python 3.x installé, ainsi que les bibliothèques suivante
 - pandas
 - sqlalchemy
 
-Vous pouvez installer les dépendances avec la commande suivante :
-```bash
-pip install pandas sqlalchemy
+
