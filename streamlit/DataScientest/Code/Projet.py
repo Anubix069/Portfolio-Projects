@@ -403,7 +403,7 @@ elif menu == "Sources":
     st.markdown("""
         - **NASA Global Temperature Dataset** : https://data.giss.nasa.gov/gistemp/
         - **Our World in Data** : https://ourworldindata.org/co2-emissions
-        - **Dataset des pays et régions**(https://ourworldindata.org/geography)
+        - **Dataset des pays et régions**(https://github.com/owid/co2-data)
         - **Temperature change on land(FAOSTAT)**(https://www.fao.org/faostat/en/#data/ET/metadata)
         - **[Rapport du GIEC]**(https://www.ipcc.ch)
         - [**Télécharger le fichier Power BI**](https://drive.google.com/file/d/1vgJfv9_-daa6k4LvFgufUfYuhLUhpBif/view?usp=sharing)
