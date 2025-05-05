@@ -191,9 +191,9 @@ elif menu == "Exploration des données":
 elif menu == "Data Visualisation":
 
     # Fichiers de données à charger
-    nasa_df = pd.read_csv("C:/Users/cleme/OneDrive/Bureau/DataScientest/Projet/GLB.Ts+dSST.csv", skiprows=1)
-    df = pd.read_csv("C:/Users/cleme/OneDrive/Bureau/DataScientest/Projet/owid-co2-data.csv")
-    df2 = pd.read_csv("C:/Users/cleme/OneDrive/Bureau/DataScientest/Projet/all.csv")
+    nasa_df = pd.read_csv("streamlit/DataScientest/Data/GLB.Ts+dSST.csv", skiprows=1)
+    df = pd.read_csv("streamlit/DataScientest/Data/owid-co2-data.csv")
+    df2 = pd.read_csv("streamlit/DataScientest/Data/all.csv")
 
     # -----------------------------------------------------------
     # Filtrer les données à partir de 1880 
