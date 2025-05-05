@@ -98,9 +98,9 @@ elif menu == "Exploration des données":
     st.subheader("Exploration des données")
 
     # Chargement des datasets
-    nasa_df = pd.read_csv("C:/Users/cleme/OneDrive/Bureau/DataScientest/Projet/GLB.Ts+dSST.csv", skiprows=1)
-    df = pd.read_csv("C:/Users/cleme/OneDrive/Bureau/DataScientest/Projet/owid-co2-data.csv")
-    df2 = pd.read_csv("C:/Users/cleme/OneDrive/Bureau/DataScientest/Projet/all.csv")
+    nasa_df = pd.read_csv("streamlit/DataScientest/Data/GLB.Ts+dSST.csv", skiprows=1)
+    df = pd.read_csv("streamlit/DataScientest/Data/owid-co2-data.csv")
+    df2 = pd.read_csv("streamlit/DataScientest/Data/all.csv")
 
     # -----------------------------------------------------------
     # Renommer les colonnes pour les saisons
