@@ -7,3 +7,5 @@ seaborn
 wordcloud
 webdriver-manager
 seleniumbase
+urllib3
+requests
