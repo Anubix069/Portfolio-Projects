@@ -112,13 +112,42 @@ elif choix == "📊 Visualisation simple":
     ax.set_title("Répartition des livres par gamme de prix")
     st.pyplot(fig)
 
+    # Distribution des prix
+    st.subheader("📉 Distribution des prix")
+    fig2 = plt.figure()
+    sns.histplot(df_filtered["Prix"], kde=True, bins=20, color="skyblue")
+    st.pyplot(fig2)
+
+    # Distribution des notes
+    rating_map = {'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5}
+    df_filtered['rating'] = df_filtered['rating'].map(rating_map)
+    
+    st.subheader("⭐ Répartition des notes")
+    fig3 = plt.figure()
+    sns.countplot(x="rating", data=df_filtered, palette="viridis")
+    st.pyplot(fig3)
+
+    # Top catégories bien notées (≥4)
+    df_top = df_filtered[df_filtered['rating'] >= 4]
+    if not df_top.empty:
+        st.subheader("👍 Catégories avec livres très bien notés (≥4)")
+        fig4 = plt.figure(figsize=(10, 4))
+        df_top['category'].value_counts().plot(kind='bar', color='teal')
+        st.pyplot(fig4)
+
 # === 4. VISUALISATION TEXTUELLE ===
 elif choix == "📝 Visualisation textuelle":
-    st.subheader("🔠 Analyse des titres des livres")
-
+    st.subheader("🔡 Analyse des titres de livres")
     df = load_data_from_github()
+    df.rename(columns={"price": "Prix"}, inplace=True)
+    df['Prix'] = df['Prix'].astype(float)
+    df['Rating'] = df['rating'].map({'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5})
 
-    text = " ".join(df['title'].dropna())
-    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
+    # FILTRE PAR PRIX ET CATEGORIE (avec option 'All')
+    prix_min, prix_max = st.slider("💰 Filtrer par gamme de prix", min_value=int(df['Prix'].min()), max_value=int(df['Prix'].max()), value=(int(df['Prix'].min()), int(df['Prix'].max())))
+    categorie = st.selectbox("📂 Filtrer par catégorie", ['All'] + list(df['category'].unique()))
 
-    st.image(wordcloud.to_array(), caption="Nuage de mots des titres des livres", use_column_width=True)
+    if categorie == 'All':
+        df_filtered = df[(df['Prix'] >= prix_min) & (df['Prix'] <= prix_max)]
+    else:
+        df_filtered = df[(df['Prix'] >= prix
