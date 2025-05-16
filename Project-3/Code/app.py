@@ -8,7 +8,9 @@ from collections import Counter
 from wordcloud import WordCloud
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from pathlib import Path
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from urllib.parse import urljoin
 import time
 import warnings
 
@@ -16,26 +18,11 @@ import warnings
 st.set_page_config(page_title="Books to Scrape", layout="wide")
 st.title("📚 Books to Scrape - Dashboard")
 
-# ==== CHEMIN VERS LE CSV ====
-CSV_PATH = Path(__file__).resolve().parent.parent / "Data" / "books_data.csv"
-
-# === FONCTION DE CHARGEMENT CSV ===
-@st.cache_data
-def load_data():
-    return pd.read_csv(CSV_PATH)
-
-# === FONCTION DE SCRAPING ===
+# === FONCTION DE SCRAPING (avec cache pour éviter relances) ===
+@st.cache_data(show_spinner=True)
 def run_scraping():
-    if platform.system() == "Linux":
-        st.error("⚠️ Le scraping Selenium n’est pas disponible sur Streamlit Cloud.")
-        st.stop()
-
-    from selenium import webdriver
-    from selenium.webdriver.chrome.options import Options
-    from selenium.webdriver.chrome.service import Service
-    from urllib.parse import urljoin
-
     start_time = time.time()
+
     warnings.filterwarnings("ignore")
     options = Options()
     options.add_argument("--headless")
@@ -50,6 +37,7 @@ def run_scraping():
 
     base_url = "https://books.toscrape.com/"
     driver.get(base_url)
+
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     category_links = soup.select("div.side_categories ul li ul li a")
 
@@ -88,11 +76,9 @@ def run_scraping():
 
     driver.quit()
     df = pd.DataFrame(books)
-    CSV_PATH.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(CSV_PATH, index=False, encoding='utf-8')
+    df.to_csv("data/books_data.csv", index=False, encoding='utf-8')
     duration = time.time() - start_time
     return df, duration
-
 
 # === FONCTION DE CHARGEMENT CSV ===
 @st.cache_data
