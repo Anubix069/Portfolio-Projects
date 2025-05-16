@@ -10,13 +10,10 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.firefox.options import Options as FirefoxOptions
-from selenium.webdriver.firefox.service import Service as FirefoxService
 from urllib.parse import urljoin
 import time
 import warnings
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.firefox import GeckoDriverManager
 
 # ==== CONFIGURATION GÉNÉRALE ====
 st.set_page_config(page_title="Books to Scrape", layout="wide")
@@ -29,7 +26,7 @@ def run_scraping(browser="chrome"):
 
     warnings.filterwarnings("ignore")
     
-    # Sélectionner le navigateur
+    # Sélectionner le navigateur (ici uniquement Chrome)
     if browser == "chrome":
         options = ChromeOptions()
         options.add_argument("--headless")
@@ -41,13 +38,6 @@ def run_scraping(browser="chrome"):
         })
         service = ChromeService(executable_path=ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=options)
-
-    elif browser == "firefox":
-        options = FirefoxOptions()
-        options.add_argument("--headless")
-        options.add_argument("--log-level=3")
-        service = FirefoxService(log_path=os.devnull)
-        driver = webdriver.Firefox(service=service, options=options, executable_path=GeckoDriverManager().install())
 
     else:
         raise ValueError(f"Browser '{browser}' not supported.")
@@ -103,7 +93,7 @@ def load_data():
     return pd.read_csv("data/books_data.csv")
 
 # === SIDEBAR ===
-choix_browser = st.sidebar.selectbox("🔧 Sélectionner le navigateur", ["chrome", "firefox"])
+choix_browser = st.sidebar.selectbox("🔧 Sélectionner le navigateur", ["chrome"])
 
 choix = st.sidebar.radio("🌐 Navigation", [
     "📜 Présentation du projet",
