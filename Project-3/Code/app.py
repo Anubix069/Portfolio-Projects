@@ -15,108 +15,34 @@ import time
 import warnings
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.os_manager import ChromeType
+import requests
 
 # ==== CONFIGURATION GÉNÉRALE ====
 st.set_page_config(page_title="Books to Scrape", layout="wide")
 st.title("📚 Books to Scrape - Dashboard")
 
-# === FONCTION DE SCRAPING (avec cache pour éviter relances) ===
-@st.cache_data(show_spinner=True)
-def run_scraping(browser="chrome"):
-    start_time = time.time()
-
-    warnings.filterwarnings("ignore")
-    
-    # Sélectionner et configurer le navigateur (ici uniquement Chrome)
-    if browser == "chrome":
-        options = ChromeOptions()
-        options.add_argument("--headless")  # Mode sans tête pour exécuter sans interface graphique
-        options.add_argument("--log-level=3")  # Réduire les logs
-        options.add_experimental_option("prefs", {
-            "profile.managed_default_content_settings.images": 2,  # Désactive le chargement des images pour gagner du temps
-            "profile.managed_default_content_settings.stylesheets": 2,  # Idem pour les styles CSS
-            "profile.managed_default_content_settings.fonts": 2  # Idem pour les polices
-        })
-        
-        # Utilisation de WebDriverManager pour gérer ChromeDriver automatiquement
-        service = ChromeService(executable_path=ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
-        driver = webdriver.Chrome(service=service, options=options)
-
-    else:
-        raise ValueError(f"Browser '{browser}' not supported.")
-    
-    # URL de base pour le scraping
-    base_url = "https://books.toscrape.com/"
-    driver.get(base_url)
-
-    # Analyser le contenu de la page d'accueil
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-    category_links = soup.select("div.side_categories ul li ul li a")
-
-    books = []
-    
-    # Parcours des catégories de livres
-    for link in category_links:
-        category_name = link.text.strip()
-        category_url = urljoin(base_url, link['href'])
-        driver.get(category_url)
-
-        while True:
-            page_soup = BeautifulSoup(driver.page_source, 'html.parser')
-            book_items = page_soup.select("article.product_pod")
-
-            # Extraction des informations sur chaque livre
-            for book in book_items:
-                title = book.h3.a["title"]
-                price = book.select_one("p.price_color").text[1:]  # Retirer le symbole de la devise
-                rating_class = book.select_one("p.star-rating")["class"][1]  # Récupérer la note du livre
-                detail_url = urljoin(category_url, book.h3.a["href"])  # URL de la page de détails du livre
-                image_url = urljoin(category_url, book.find('img')['src'])  # URL de l'image du livre
-
-                books.append({
-                    "title": title,
-                    "price": float(price),
-                    "rating": rating_class,
-                    "category": category_name,
-                    "url": detail_url,
-                    "image_url": image_url
-                })
-
-            # Vérifier s'il y a une page suivante
-            next_button = page_soup.select_one("li.next a")
-            if next_button:
-                next_url = urljoin(category_url, next_button['href'])
-                driver.get(next_url)
-            else:
-                break  # Si pas de page suivante, on sort de la boucle
-
-    # Fermer le navigateur après le scraping
-    driver.quit()
-    
-    # Sauvegarder les données dans un DataFrame et les exporter en CSV
-    df = pd.DataFrame(books)
-    df.to_csv("data/books_data.csv", index=False, encoding='utf-8')
-    
-    # Calculer le temps d'exécution du scraping
-    duration = time.time() - start_time
-    return df, duration
-
-# === FONCTION DE CHARGEMENT CSV (avec cache pour éviter la relecture fréquente) ===
+# === FONCTION DE CHARGEMENT CSV (depuis GitHub) ===
 @st.cache_data
 def load_data():
-    if os.path.exists("data/books_data.csv"):
-        return pd.read_csv("data/books_data.csv")
-    else:
-        return pd.DataFrame()  # Retourner un DataFrame vide si le fichier n'existe pas
+    url = "https://raw.githubusercontent.com/clementlabois/Portfolio-Projects/main/Project-3/Data/books_data.csv"
+    
+    try:
+        # Télécharger le fichier CSV depuis GitHub
+        response = requests.get(url)
+        response.raise_for_status()  # Lève une exception en cas d'échec du téléchargement
 
-
+        # Charger les données dans un DataFrame
+        df = pd.read_csv(pd.compat.StringIO(response.text))
+        return df
+    except requests.exceptions.RequestException as e:
+        st.error(f"Erreur lors du téléchargement du fichier : {e}")
+        return pd.DataFrame()  # Retourner un DataFrame vide en cas d'erreur
 
 # === SIDEBAR ===
 choix_browser = st.sidebar.selectbox("🔧 Sélectionner le navigateur", ["chrome"])
 
 choix = st.sidebar.radio("🌐 Navigation", [
     "📜 Présentation du projet",
-    "🔄 Web Scraping",
     "🧑‍💻 Exploration des données",
     "📊 Visualisation simple",
     "📝 Visualisation textuelle"
@@ -150,81 +76,72 @@ if choix == "📜 Présentation du projet":
         """, unsafe_allow_html=True
     )
 
-# === 2. WEB SCRAPING ===
-elif choix == "🔄 Web Scraping":
-    st.subheader("📥 Lancer le scraping")
-    if st.button("🛠️ Scraper les livres"):
-        df, duration = run_scraping(browser=choix_browser)
-        st.success(f"{len(df)} livres récupérés en {duration:.2f} secondes.")
-        st.dataframe(df.head())
-
-    elif os.path.exists("data/books_data.csv"):
-        df = load_data()
-        st.info("💾 Fichier existant chargé.")
-        st.dataframe(df.head())
-
-    else:
-        st.warning("⚠️ Clique sur le bouton ci-dessus pour démarrer le scraping.")
-
-# === 3. Exploration des données ===
+# === 2. EXPLORATION DES DONNÉES ===
 elif choix == "🧑‍💻 Exploration des données":
     st.subheader("🔍 Apperçu des données")
     df = load_data()
-    st.write(df.head(10))
+    if df.empty:
+        st.warning("⚠️ Aucun fichier trouvé ou erreur dans le chargement des données.")
+    else:
+        st.write(df.head(10))
 
-    column_df = pd.DataFrame(df.columns, columns=["Nom des Colonnes"])
-    st.write(column_df)
+        column_df = pd.DataFrame(df.columns, columns=["Nom des Colonnes"])
+        st.write(column_df)
 
-    st.subheader("📊 Statistiques descriptives du Dataset")
-    st.write(df["title"].describe())
-    st.write(df["price"].describe())
-    st.write(df["rating"].describe())
-    st.write(df["category"].describe())
+        st.subheader("📊 Statistiques descriptives du Dataset")
+        st.write(df["title"].describe())
+        st.write(df["price"].describe())
+        st.write(df["rating"].describe())
+        st.write(df["category"].describe())
 
-    # Calculer le pourcentage de valeurs manquantes par colonne
-    st.subheader("Valeurs manquantes")
-    missing_data = pd.DataFrame({
-        "Colonne" : df.columns,
-        "Pourcentage de valeur manquantes (%)" : [
-        df[column].isna().sum() / len(df) * 100 for column in df.columns    
-        ]
-    })
+        # Calculer le pourcentage de valeurs manquantes par colonne
+        st.subheader("Valeurs manquantes")
+        missing_data = pd.DataFrame({
+            "Colonne" : df.columns,
+            "Pourcentage de valeur manquantes (%)" : [
+                df[column].isna().sum() / len(df) * 100 for column in df.columns    
+            ]
+        })
 
-    st.write(missing_data)
+        st.write(missing_data)
 
-# === 4. VISUALISATION SIMPLE ===
+# === 3. VISUALISATION SIMPLE ===
 elif choix == "📊 Visualisation simple":
     st.subheader("📈 Visualisations générales")
     df = load_data()
-    df.rename(columns={"price": "Prix"}, inplace=True)
-
-    # FILTRE PAR PRIX ET CATEGORIE (avec option 'All')
-    prix_min, prix_max = st.slider("💰 Filtrer par gamme de prix", min_value=int(df['Prix'].min()), max_value=int(df['Prix'].max()), value=(int(df['Prix'].min()), int(df['Prix'].max())))
-    categorie = st.selectbox("📂 Filtrer par catégorie", ['All'] + list(df['category'].unique()))
-
-    if categorie == 'All':
-        df_filtered = df[(df['Prix'] >= prix_min) & (df['Prix'] <= prix_max)]
+    if df.empty:
+        st.warning("⚠️ Aucun fichier trouvé ou erreur dans le chargement des données.")
     else:
-        df_filtered = df[(df['Prix'] >= prix_min) & (df['Prix'] <= prix_max) & (df['category'] == categorie)]
+        df.rename(columns={"price": "Prix"}, inplace=True)
 
-    # Graphique par gamme de prix
-    price_bins = [0, 5, 10, 15, 20, 25, 30, 40, 50, 100]
-    price_labels = ["0-5", "5-10", "10-15", "15-20", "20-25", "25-30", "30-40", "40-50", "50+"]
-    df_filtered['Price_Bin'] = pd.cut(df_filtered['Prix'], bins=price_bins, labels=price_labels, right=False)
+        # FILTRE PAR PRIX ET CATEGORIE (avec option 'All')
+        prix_min, prix_max = st.slider("💰 Filtrer par gamme de prix", min_value=int(df['Prix'].min()), max_value=int(df['Prix'].max()), value=(int(df['Prix'].min()), int(df['Prix'].max())))
+        categorie = st.selectbox("📂 Filtrer par catégorie", ['All'] + list(df['category'].unique()))
 
-    st.subheader("🔍 Répartition des livres par prix")
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sns.countplot(data=df_filtered, x='Price_Bin', palette="viridis", ax=ax)
-    ax.set_title("Répartition des livres par gamme de prix")
-    st.pyplot(fig)
+        if categorie == 'All':
+            df_filtered = df[(df['Prix'] >= prix_min) & (df['Prix'] <= prix_max)]
+        else:
+            df_filtered = df[(df['Prix'] >= prix_min) & (df['Prix'] <= prix_max) & (df['category'] == categorie)]
 
-# === 5. VISUALISATION TEXTUELLE ===
+        # Graphique par gamme de prix
+        price_bins = [0, 5, 10, 15, 20, 25, 30, 40, 50, 100]
+        price_labels = ["0-5", "5-10", "10-15", "15-20", "20-25", "25-30", "30-40", "40-50", "50+"]
+        df_filtered['Price_Bin'] = pd.cut(df_filtered['Prix'], bins=price_bins, labels=price_labels, right=False)
+
+        st.subheader("🔍 Répartition des livres par prix")
+        fig, ax = plt.subplots(figsize=(8, 6))
+        sns.countplot(data=df_filtered, x='Price_Bin', palette="viridis", ax=ax)
+        ax.set_title("Répartition des livres par gamme de prix")
+        st.pyplot(fig)
+
+# === 4. VISUALISATION TEXTUELLE ===
 elif choix == "📝 Visualisation textuelle":
     st.subheader("🔠 Analyse des titres des livres")
-
     df = load_data()
+    if df.empty:
+        st.warning("⚠️ Aucun fichier trouvé ou erreur dans le chargement des données.")
+    else:
+        text = " ".join(df['title'].dropna())
+        wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
 
-    text = " ".join(df['title'].dropna())
-    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
-
-    st.image(wordcloud.to_array(), caption="Nuage de mots des titres des livres", use_column_width=True)
+        st.image(wordcloud.to_array(), caption="Nuage de mots des titres des livres", use_column_width=True)
