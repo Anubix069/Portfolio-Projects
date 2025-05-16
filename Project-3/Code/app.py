@@ -7,14 +7,8 @@ import re
 from collections import Counter
 from wordcloud import WordCloud
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options as ChromeOptions
-from selenium.webdriver.chrome.service import Service as ChromeService
-from urllib.parse import urljoin
 import time
 import warnings
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.os_manager import ChromeType
 import requests
 
 # ==== CONFIGURATION GÉNÉRALE ====
@@ -23,20 +17,10 @@ st.title("📚 Books to Scrape - Dashboard")
 
 # === FONCTION DE CHARGEMENT CSV (depuis GitHub) ===
 @st.cache_data
-def load_data():
+def load_data_from_github():
     url = "https://raw.githubusercontent.com/clementlabois/Portfolio-Projects/main/Project-3/Data/books_data.csv"
-    
-    try:
-        # Télécharger le fichier CSV depuis GitHub
-        response = requests.get(url)
-        response.raise_for_status()  # Lève une exception en cas d'échec du téléchargement
-
-        # Charger les données dans un DataFrame
-        df = pd.read_csv(pd.compat.StringIO(response.text))
-        return df
-    except requests.exceptions.RequestException as e:
-        st.error(f"Erreur lors du téléchargement du fichier : {e}")
-        return pd.DataFrame()  # Retourner un DataFrame vide en cas d'erreur
+    df = pd.read_csv(url)
+    return df
 
 # === SIDEBAR ===
 choix_browser = st.sidebar.selectbox("🔧 Sélectionner le navigateur", ["chrome"])
@@ -76,72 +60,65 @@ if choix == "📜 Présentation du projet":
         """, unsafe_allow_html=True
     )
 
-# === 2. EXPLORATION DES DONNÉES ===
+# === 2. Exploration des données ===
 elif choix == "🧑‍💻 Exploration des données":
     st.subheader("🔍 Apperçu des données")
-    df = load_data()
-    if df.empty:
-        st.warning("⚠️ Aucun fichier trouvé ou erreur dans le chargement des données.")
-    else:
-        st.write(df.head(10))
+    df = load_data_from_github()
+    st.write(df.head(10))
 
-        column_df = pd.DataFrame(df.columns, columns=["Nom des Colonnes"])
-        st.write(column_df)
+    column_df = pd.DataFrame(df.columns, columns=["Nom des Colonnes"])
+    st.write(column_df)
 
-        st.subheader("📊 Statistiques descriptives du Dataset")
-        st.write(df["title"].describe())
-        st.write(df["price"].describe())
-        st.write(df["rating"].describe())
-        st.write(df["category"].describe())
+    st.subheader("📊 Statistiques descriptives du Dataset")
+    st.write(df["title"].describe())
+    st.write(df["price"].describe())
+    st.write(df["rating"].describe())
+    st.write(df["category"].describe())
 
-        # Calculer le pourcentage de valeurs manquantes par colonne
-        st.subheader("Valeurs manquantes")
-        missing_data = pd.DataFrame({
-            "Colonne" : df.columns,
-            "Pourcentage de valeur manquantes (%)" : [
-                df[column].isna().sum() / len(df) * 100 for column in df.columns    
-            ]
-        })
+    # Calculer le pourcentage de valeurs manquantes par colonne
+    st.subheader("Valeurs manquantes")
+    missing_data = pd.DataFrame({
+        "Colonne" : df.columns,
+        "Pourcentage de valeur manquantes (%)" : [
+        df[column].isna().sum() / len(df) * 100 for column in df.columns    
+        ]
+    })
 
-        st.write(missing_data)
+    st.write(missing_data)
 
 # === 3. VISUALISATION SIMPLE ===
 elif choix == "📊 Visualisation simple":
     st.subheader("📈 Visualisations générales")
-    df = load_data()
-    if df.empty:
-        st.warning("⚠️ Aucun fichier trouvé ou erreur dans le chargement des données.")
+    df = load_data_from_github()
+    df.rename(columns={"price": "Prix"}, inplace=True)
+
+    # FILTRE PAR PRIX ET CATEGORIE (avec option 'All')
+    prix_min, prix_max = st.slider("💰 Filtrer par gamme de prix", min_value=int(df['Prix'].min()), max_value=int(df['Prix'].max()), value=(int(df['Prix'].min()), int(df['Prix'].max())))
+    categorie = st.selectbox("📂 Filtrer par catégorie", ['All'] + list(df['category'].unique()))
+
+    if categorie == 'All':
+        df_filtered = df[(df['Prix'] >= prix_min) & (df['Prix'] <= prix_max)]
     else:
-        df.rename(columns={"price": "Prix"}, inplace=True)
+        df_filtered = df[(df['Prix'] >= prix_min) & (df['Prix'] <= prix_max) & (df['category'] == categorie)]
 
-        # FILTRE PAR PRIX ET CATEGORIE (avec option 'All')
-        prix_min, prix_max = st.slider("💰 Filtrer par gamme de prix", min_value=int(df['Prix'].min()), max_value=int(df['Prix'].max()), value=(int(df['Prix'].min()), int(df['Prix'].max())))
-        categorie = st.selectbox("📂 Filtrer par catégorie", ['All'] + list(df['category'].unique()))
+    # Graphique par gamme de prix
+    price_bins = [0, 5, 10, 15, 20, 25, 30, 40, 50, 100]
+    price_labels = ["0-5", "5-10", "10-15", "15-20", "20-25", "25-30", "30-40", "40-50", "50+"]
+    df_filtered['Price_Bin'] = pd.cut(df_filtered['Prix'], bins=price_bins, labels=price_labels, right=False)
 
-        if categorie == 'All':
-            df_filtered = df[(df['Prix'] >= prix_min) & (df['Prix'] <= prix_max)]
-        else:
-            df_filtered = df[(df['Prix'] >= prix_min) & (df['Prix'] <= prix_max) & (df['category'] == categorie)]
-
-        # Graphique par gamme de prix
-        price_bins = [0, 5, 10, 15, 20, 25, 30, 40, 50, 100]
-        price_labels = ["0-5", "5-10", "10-15", "15-20", "20-25", "25-30", "30-40", "40-50", "50+"]
-        df_filtered['Price_Bin'] = pd.cut(df_filtered['Prix'], bins=price_bins, labels=price_labels, right=False)
-
-        st.subheader("🔍 Répartition des livres par prix")
-        fig, ax = plt.subplots(figsize=(8, 6))
-        sns.countplot(data=df_filtered, x='Price_Bin', palette="viridis", ax=ax)
-        ax.set_title("Répartition des livres par gamme de prix")
-        st.pyplot(fig)
+    st.subheader("🔍 Répartition des livres par prix")
+    fig, ax = plt.subplots(figsize=(8, 6))
+    sns.countplot(data=df_filtered, x='Price_Bin', palette="viridis", ax=ax)
+    ax.set_title("Répartition des livres par gamme de prix")
+    st.pyplot(fig)
 
 # === 4. VISUALISATION TEXTUELLE ===
 elif choix == "📝 Visualisation textuelle":
     st.subheader("🔠 Analyse des titres des livres")
-    df = load_data()
-    if df.empty:
-        st.warning("⚠️ Aucun fichier trouvé ou erreur dans le chargement des données.")
-    else:
-        text = " ".join(df['title'].dropna())
-        wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
 
-        st.image(wordcloud.to_array(), caption="Nuage de mots des titres des livres", use_column_width=True)
+    df = load_data_from_github()
+
+    text = " ".join(df['title'].dropna())
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
+
+    st.image(wordcloud.to_array(), caption="Nuage de mots des titres des livres", use_column_width=True)
