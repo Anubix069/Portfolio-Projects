@@ -26,13 +26,9 @@ st.set_page_config(page_title="Books to Scrape", layout="wide")
 st.title("📚 Books to Scrape - Dashboard")
 
 # === FONCTION DE SCRAPING (avec cache pour éviter relances) ===
-@st.cache_data(show_spinner=True)
-def run_scraping(browser="chrome"):
-    start_time = time.time()
-
-    warnings.filterwarnings("ignore")
-    
-    # Sélectionner le navigateur
+@st.cache_resource(show_spinner=True)
+def get_driver(browser="chrome"):
+    """ Cette fonction crée et renvoie un driver Selenium en fonction du navigateur sélectionné. """
     if browser == "chrome":
         options = ChromeOptions()
         options.add_argument("--headless")
@@ -43,25 +39,33 @@ def run_scraping(browser="chrome"):
             "profile.managed_default_content_settings.fonts": 2
         })
         service = ChromeService(executable_path=ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=options)
+        return webdriver.Chrome(service=service, options=options)
 
     elif browser == "firefox":
         options = FirefoxOptions()
         options.add_argument("--headless")
         options.add_argument("--log-level=3")
         service = FirefoxService(log_path=os.devnull)
-        driver = webdriver.Firefox(service=service, options=options, executable_path=GeckoDriverManager().install())
+        return webdriver.Firefox(service=service, options=options, executable_path=GeckoDriverManager().install())
 
     elif browser == "edge":
         options = EdgeOptions()
         options.add_argument("--headless")
         options.add_argument("--log-level=3")
         service = EdgeService(executable_path=EdgeDriverManager().install())
-        driver = webdriver.Edge(service=service, options=options)
+        return webdriver.Edge(service=service, options=options)
 
     else:
         raise ValueError(f"Browser '{browser}' not supported.")
+
+@st.cache_data
+def run_scraping(browser="chrome"):
+    """ Fonction qui lance le scraping des livres sur le site Books to Scrape. """
+    start_time = time.time()
+
+    warnings.filterwarnings("ignore")
     
+    driver = get_driver(browser)
     base_url = "https://books.toscrape.com/"
     driver.get(base_url)
 
