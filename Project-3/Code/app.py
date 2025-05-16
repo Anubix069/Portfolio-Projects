@@ -12,11 +12,14 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.webdriver.edge.service import Service as EdgeService
 from urllib.parse import urljoin
 import time
 import warnings
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.microsoft import EdgeDriverManager
 
 # ==== CONFIGURATION GÉNÉRALE ====
 st.set_page_config(page_title="Books to Scrape", layout="wide")
@@ -48,6 +51,13 @@ def run_scraping(browser="chrome"):
         options.add_argument("--log-level=3")
         service = FirefoxService(log_path=os.devnull)
         driver = webdriver.Firefox(service=service, options=options, executable_path=GeckoDriverManager().install())
+
+    elif browser == "edge":
+        options = EdgeOptions()
+        options.add_argument("--headless")
+        options.add_argument("--log-level=3")
+        service = EdgeService(executable_path=EdgeDriverManager().install())
+        driver = webdriver.Edge(service=service, options=options)
 
     else:
         raise ValueError(f"Browser '{browser}' not supported.")
