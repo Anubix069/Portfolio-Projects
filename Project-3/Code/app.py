@@ -16,7 +16,9 @@ st.title("📚 Books Dashboard")
 # === FONCTION DE CHARGEMENT CSV ===
 @st.cache_data
 def load_data():
-    return pd.read_csv("data/books_data.csv")
+    url = "https://raw.githubusercontent.com/clementlabois/Portfolio-Projects/main/Project-3/Data/books_data.csv"  # URL directe vers le fichier CSV brut
+    df = pd.read_csv(url)
+    return df
 
 # === SIDEBAR ===
 choix = st.sidebar.radio("🌐 Navigation", [
