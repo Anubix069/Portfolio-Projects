@@ -12,23 +12,24 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.firefox.service import Service as FirefoxService
-from selenium.webdriver.edge.options import Options as EdgeOptions
-from selenium.webdriver.edge.service import Service as EdgeService
 from urllib.parse import urljoin
 import time
 import warnings
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
-from webdriver_manager.microsoft import EdgeDriverManager
 
 # ==== CONFIGURATION GÉNÉRALE ====
 st.set_page_config(page_title="Books to Scrape", layout="wide")
 st.title("📚 Books to Scrape - Dashboard")
 
 # === FONCTION DE SCRAPING (avec cache pour éviter relances) ===
-@st.cache_resource(show_spinner=True)
-def get_driver(browser="chrome"):
-    """ Cette fonction crée et renvoie un driver Selenium en fonction du navigateur sélectionné. """
+@st.cache_data(show_spinner=True)
+def run_scraping(browser="chrome"):
+    start_time = time.time()
+
+    warnings.filterwarnings("ignore")
+    
+    # Sélectionner le navigateur
     if browser == "chrome":
         options = ChromeOptions()
         options.add_argument("--headless")
@@ -39,33 +40,18 @@ def get_driver(browser="chrome"):
             "profile.managed_default_content_settings.fonts": 2
         })
         service = ChromeService(executable_path=ChromeDriverManager().install())
-        return webdriver.Chrome(service=service, options=options)
+        driver = webdriver.Chrome(service=service, options=options)
 
     elif browser == "firefox":
         options = FirefoxOptions()
         options.add_argument("--headless")
         options.add_argument("--log-level=3")
         service = FirefoxService(log_path=os.devnull)
-        return webdriver.Firefox(service=service, options=options, executable_path=GeckoDriverManager().install())
-
-    elif browser == "edge":
-        options = EdgeOptions()
-        options.add_argument("--headless")
-        options.add_argument("--log-level=3")
-        service = EdgeService(executable_path=EdgeDriverManager().install())
-        return webdriver.Edge(service=service, options=options)
+        driver = webdriver.Firefox(service=service, options=options, executable_path=GeckoDriverManager().install())
 
     else:
         raise ValueError(f"Browser '{browser}' not supported.")
-
-@st.cache_data
-def run_scraping(browser="chrome"):
-    """ Fonction qui lance le scraping des livres sur le site Books to Scrape. """
-    start_time = time.time()
-
-    warnings.filterwarnings("ignore")
     
-    driver = get_driver(browser)
     base_url = "https://books.toscrape.com/"
     driver.get(base_url)
 
@@ -117,7 +103,7 @@ def load_data():
     return pd.read_csv("data/books_data.csv")
 
 # === SIDEBAR ===
-choix_browser = st.sidebar.selectbox("🔧 Sélectionner le navigateur", ["chrome", "firefox", "edge"])
+choix_browser = st.sidebar.selectbox("🔧 Sélectionner le navigateur", ["chrome", "firefox"])
 
 choix = st.sidebar.radio("🌐 Navigation", [
     "📜 Présentation du projet",
