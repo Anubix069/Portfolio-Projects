@@ -1,48 +1,51 @@
-🕵️‍♂️ Web Scraping - Book Data from Books to Scrape 📚
-📌 Description
-Ce projet utilise Web Scraping pour extraire des informations sur les livres à partir du site Books to Scrape, un site fictif d'exemple utilisé pour l'apprentissage du web scraping. L'objectif est de récupérer des données telles que le titre, le prix, la note et la catégorie des livres, puis de les analyser à l'aide de bibliothèques Python telles que Pandas, Matplotlib et Seaborn. Le projet permet d'explorer des techniques d'extraction, de nettoyage et d'analyse de données issues d'une page web.
+# 🕵️‍♂️ Web Scraping - Book Data from Books to Scrape 📚
 
-🔗 Sources
-Site de Scraping : Books to Scrape
+## 📌 Description
+This project uses Web Scraping to extract book information from the Books to Scrape website, a fictional site used for web scraping learning purposes. The goal is to retrieve data such as book titles, prices, ratings, and categories, and then analyze them using Python libraries like Pandas, Matplotlib, and Seaborn. The project explores techniques for data extraction, cleaning, and analysis from a website.
 
-Dépôt de données : Raw data repository on GitHub
+*Original sources*
 
-🔍 Principales analyses réalisées
-Visualisation des prix : Répartition des livres selon leur gamme de prix
+🔗  Scraping Site: Books to Scrape : https://books.toscrape.com/catalogue/category/books_1/
 
-Répartition des notes : Analyse de la répartition des notes des livres
+Raw Data Repository: Raw data repository on GitHub : https://github.com/clementlabois/Portfolio-Projects/blob/main/Project-3/Data/books_data.csv
 
-Nuage de mots : Analyse textuelle des titres des livres
+## 🔍 Key Insights from the Analysis
+Price Distribution: Breakdown of books by price range
 
-Analyse par catégorie : Identification des catégories populaires et des livres les mieux notés
+Rating Distribution: Analysis of book ratings across the platform
 
-Le projet inclut également un tableau de bord interactif construit avec Streamlit qui permet de visualiser les données récupérées et d'appliquer des filtres dynamiques sur les catégories et les prix des livres.
+Word Cloud: Textual analysis of book titles
 
-🛠️ Technologies utilisées
+Category Analysis: Identifying popular categories and highly rated books
+
+The project also includes an interactive dashboard built with Streamlit that allows users to visualize the scraped data and apply dynamic filters based on book categories and prices.
+
+## 🛠️ Technologies Used
 Python (Pandas, Matplotlib, Seaborn, WordCloud)
 
-Streamlit pour le tableau de bord interactif
+Streamlit for the interactive dashboard
 
-BeautifulSoup et Selenium pour le web scraping
+BeautifulSoup and Selenium for web scraping
 
-Jupyter Notebook pour l'EDA (Exploratory Data Analysis)
+Jupyter Notebook for EDA (Exploratory Data Analysis)
 
-💡 Compétences démontrées
-Extraction de données à l'aide de BeautifulSoup et Selenium
+## 💡 Skills Demonstrated
+Data extraction using BeautifulSoup and Selenium
 
-Analyse de données structurées avec Pandas et visualisation avec Matplotlib et Seaborn
+Data analysis with Pandas and visualization with Matplotlib and Seaborn
 
-Création d'un tableau de bord interactif avec Streamlit pour l'exploration de données
+Creating an interactive dashboard with Streamlit for data exploration
 
-Nettoyage et préparation des données avant analyse
+Data cleaning and preparation before analysis
 
-Visualisation de données complexes, y compris l'utilisation de nuages de mots pour l'analyse textuelle
+Visualizing complex data, including the use of word clouds for textual analysis
 
-📊 Analyse des données
-Top catégories : Exploration des catégories de livres les mieux notées
+## 📊 Data Analysis
+Top Categories: Exploration of the highest-rated book categories
 
-Répartition des livres par prix : Calcul des livres selon leur prix dans des gammes définies
+Price Distribution: Categorizing books into price ranges
 
-Distribution des notes : Analyse de la répartition des notes des livres sur la plateforme
+Rating Distribution: Analyzing the distribution of book ratings on the platform
 
-Analyse des titres de livres : Extraction et visualisation des mots les plus fréquents dans les titres des livres
+Book Title Analysis: Extracting and visualizing the most frequent words in book titles
+
