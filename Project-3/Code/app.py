@@ -14,6 +14,7 @@ from urllib.parse import urljoin
 import time
 import warnings
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.os_manager import ChromeType
 
 # ==== CONFIGURATION GÉNÉRALE ====
 st.set_page_config(page_title="Books to Scrape", layout="wide")
@@ -26,29 +27,35 @@ def run_scraping(browser="chrome"):
 
     warnings.filterwarnings("ignore")
     
-    # Sélectionner le navigateur (ici uniquement Chrome)
+    # Sélectionner et configurer le navigateur (ici uniquement Chrome)
     if browser == "chrome":
         options = ChromeOptions()
-        options.add_argument("--headless")
-        options.add_argument("--log-level=3")
+        options.add_argument("--headless")  # Mode sans tête pour exécuter sans interface graphique
+        options.add_argument("--log-level=3")  # Réduire les logs
         options.add_experimental_option("prefs", {
-            "profile.managed_default_content_settings.images": 2,
-            "profile.managed_default_content_settings.stylesheets": 2,
-            "profile.managed_default_content_settings.fonts": 2
+            "profile.managed_default_content_settings.images": 2,  # Désactive le chargement des images pour gagner du temps
+            "profile.managed_default_content_settings.stylesheets": 2,  # Idem pour les styles CSS
+            "profile.managed_default_content_settings.fonts": 2  # Idem pour les polices
         })
-        service = ChromeService(executable_path=ChromeDriverManager().install())
+        
+        # Utilisation de WebDriverManager pour gérer ChromeDriver automatiquement
+        service = ChromeService(executable_path=ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
         driver = webdriver.Chrome(service=service, options=options)
 
     else:
         raise ValueError(f"Browser '{browser}' not supported.")
     
+    # URL de base pour le scraping
     base_url = "https://books.toscrape.com/"
     driver.get(base_url)
 
+    # Analyser le contenu de la page d'accueil
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     category_links = soup.select("div.side_categories ul li ul li a")
 
     books = []
+    
+    # Parcours des catégories de livres
     for link in category_links:
         category_name = link.text.strip()
         category_url = urljoin(base_url, link['href'])
@@ -58,12 +65,13 @@ def run_scraping(browser="chrome"):
             page_soup = BeautifulSoup(driver.page_source, 'html.parser')
             book_items = page_soup.select("article.product_pod")
 
+            # Extraction des informations sur chaque livre
             for book in book_items:
                 title = book.h3.a["title"]
-                price = book.select_one("p.price_color").text[1:]
-                rating_class = book.select_one("p.star-rating")["class"][1]
-                detail_url = urljoin(category_url, book.h3.a["href"])
-                image_url = urljoin(category_url, book.find('img')['src'])
+                price = book.select_one("p.price_color").text[1:]  # Retirer le symbole de la devise
+                rating_class = book.select_one("p.star-rating")["class"][1]  # Récupérer la note du livre
+                detail_url = urljoin(category_url, book.h3.a["href"])  # URL de la page de détails du livre
+                image_url = urljoin(category_url, book.find('img')['src'])  # URL de l'image du livre
 
                 books.append({
                     "title": title,
@@ -74,23 +82,34 @@ def run_scraping(browser="chrome"):
                     "image_url": image_url
                 })
 
+            # Vérifier s'il y a une page suivante
             next_button = page_soup.select_one("li.next a")
             if next_button:
                 next_url = urljoin(category_url, next_button['href'])
                 driver.get(next_url)
             else:
-                break
+                break  # Si pas de page suivante, on sort de la boucle
 
+    # Fermer le navigateur après le scraping
     driver.quit()
+    
+    # Sauvegarder les données dans un DataFrame et les exporter en CSV
     df = pd.DataFrame(books)
     df.to_csv("data/books_data.csv", index=False, encoding='utf-8')
+    
+    # Calculer le temps d'exécution du scraping
     duration = time.time() - start_time
     return df, duration
 
-# === FONCTION DE CHARGEMENT CSV ===
+# === FONCTION DE CHARGEMENT CSV (avec cache pour éviter la relecture fréquente) ===
 @st.cache_data
 def load_data():
-    return pd.read_csv("data/books_data.csv")
+    if os.path.exists("data/books_data.csv"):
+        return pd.read_csv("data/books_data.csv")
+    else:
+        return pd.DataFrame()  # Retourner un DataFrame vide si le fichier n'existe pas
+
+
 
 # === SIDEBAR ===
 choix_browser = st.sidebar.selectbox("🔧 Sélectionner le navigateur", ["chrome"])
