@@ -39,8 +39,8 @@ def run_scraping(browser="chrome"):
             "profile.managed_default_content_settings.stylesheets": 2,
             "profile.managed_default_content_settings.fonts": 2
         })
-        service = ChromeService(log_path=os.devnull)
-        driver = webdriver.Chrome(service=service, options=options, executable_path=ChromeDriverManager().install())
+        service = ChromeService(executable_path=ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=options)
 
     elif browser == "firefox":
         options = FirefoxOptions()
