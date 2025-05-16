@@ -5,4 +5,4 @@ plotly
 matplotlib
 selenium
 seaborn
-worldCloud
+wordcloud
