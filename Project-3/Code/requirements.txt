@@ -5,8 +5,4 @@ plotly
 matplotlib
 seaborn
 wordcloud
-webdriver-manager
-seleniumbase
-urllib3
 requests
-six
