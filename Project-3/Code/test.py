@@ -13,11 +13,31 @@ import time
 st.set_page_config(page_title="Books Dashboard", layout="wide")
 st.title("📚 Books Dashboard")
 
+# === CONFIGURATION DE L'API ScrapingBee ===
+API_KEY = "votre_clé_api"  # Remplace par ta clé API ScrapingBee
+
+# Fonction pour envoyer des requêtes avec ScrapingBee
+def fetch_with_scrapingbee(url):
+    api_url = "http://api.scrapingbee.com"
+    params = {
+        "api_key": API_KEY,
+        "url": url
+    }
+    response = requests.get(api_url, params=params)
+    if response.status_code == 200:
+        return response.text
+    else:
+        st.error(f"Erreur lors de l'appel à ScrapingBee: {response.status_code}")
+        return None
+
 # === FONCTION DE SCRAPING LIVE ===
 def scraper():
     url = 'https://books.toscrape.com/'
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
+    response_text = fetch_with_scrapingbee(url)
+    if not response_text:
+        return pd.DataFrame()  # Retourne un DataFrame vide en cas d'erreur
+
+    soup = BeautifulSoup(response_text, 'html.parser')
     
     books = []
     for book in soup.find_all('article', class_='product_pod'):
@@ -214,10 +234,9 @@ elif choix == "📝 Visualisation textuelle":
     st.pyplot(fig6)
 
     # Word cloud
-    st.markdown("<h4 style='text-align: center;'>☁️ Nuage de mots</h4>", unsafe_allow_html=True)
-    fig7 = plt.figure(figsize=(10, 6))
-    wordcloud = WordCloud(width=800, height=400, background_color="white", colormap='viridis')
-    wordcloud.generate_from_frequencies(most_common)
+    st.markdown("<h4 style='text-align: center;'>🌐 Nuage de mots</h4>", unsafe_allow_html=True)
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate_from_frequencies(most_common)
+    plt.figure(figsize=(10, 8))
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
-    st.pyplot(fig7)
+    st.pyplot(plt)
