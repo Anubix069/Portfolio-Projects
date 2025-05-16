@@ -1,7 +1,9 @@
 # 🕵️‍♂️ Web Scraping - Book Data from Books to Scrape 📚
 
 ## 📌 Description
-This project uses Web Scraping to extract book information from the Books to Scrape website, a fictional site used for web scraping learning purposes. The goal is to retrieve data such as book titles, prices, ratings, and categories, and then analyze them using Python libraries like Pandas, Matplotlib, and Seaborn. The project explores techniques for data extraction, cleaning, and analysis from a website.
+This project involves extracting book information from the **Books to Scrape** website, a fictional site used for web scraping learning purposes. While the live scraping functionality has been disabled in the interactive dashboard, the project still demonstrates how data was originally scraped and stored in a **CSV file** for analysis.
+
+The goal is to retrieve data such as book titles, prices, ratings, and categories, and then analyze them using Python libraries like **Pandas**, **Matplotlib**, and **Seaborn**. The project explores techniques for data extraction, cleaning, and analysis from a website.
 
 *Original sources*
 
@@ -10,35 +12,37 @@ This project uses Web Scraping to extract book information from the Books to Scr
 Raw Data Repository: Raw data repository on GitHub : https://github.com/clementlabois/Portfolio-Projects/blob/main/Project-3/Data/books_data.csv
 
 ## 🔍 Key Insights from the Analysis
-Price Distribution: Breakdown of books by price range
+**Price Distribution**: Breakdown of books by price range
 
-Rating Distribution: Analysis of book ratings across the platform
+**Rating Distribution**: Analysis of book ratings across the platform
 
-Word Cloud: Textual analysis of book titles
+**Word Cloud**: Textual analysis of book titles
 
-Category Analysis: Identifying popular categories and highly rated books
+**Category Analysis**: Identifying popular categories and highly rated books
 
 The project also includes an interactive dashboard built with Streamlit that allows users to visualize the scraped data and apply dynamic filters based on book categories and prices.
 
 ## 🛠️ Technologies Used
-Python (Pandas, Matplotlib, Seaborn, WordCloud)
+**Python** (Pandas, Matplotlib, Seaborn, WordCloud)
 
-Streamlit for the interactive dashboard
+**Streamlit** for the interactive dashboard
 
-BeautifulSoup and Selenium for web scraping
-
-Jupyter Notebook for EDA (Exploratory Data Analysis)
+**BeautifulSoup** for web scraping
 
 ## 💡 Skills Demonstrated
-Data extraction using BeautifulSoup and Selenium
+**Data extraction: Using BeautifulSoup and Selenium (for live scraping) and CSV data import
 
-Data analysis with Pandas and visualization with Matplotlib and Seaborn
+**Data analysis**: Manipulating and analyzing data with Pandas
 
-Creating an interactive dashboard with Streamlit for data exploration
+**Data visualization**: Using Matplotlib and Seaborn for creating graphs and charts
 
-Data cleaning and preparation before analysis
+**Creating an interactive dashboard**: Streamlit to display dynamic and interactive data visualizations
 
-Visualizing complex data, including the use of word clouds for textual analysis
+**Data cleaning and preparation**: Handling missing values, cleaning data for further analysis
+
+**Word Cloud**: Textual analysis of book titles and frequent word visualization
+
+
 
 ## 📊 Data Analysis
 Top Categories: Exploration of the highest-rated book categories
