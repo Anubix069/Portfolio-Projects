@@ -45,10 +45,10 @@ The project also includes an interactive dashboard built with Streamlit that all
 
 
 ## 📊 Data Analysis
-Top Categories: Exploration of the highest-rated book categories
+**Top Categories**: Exploration of the highest-rated book categories
 
-Price Distribution: Categorizing books into price ranges
+**Price Distribution**: Categorizing books into price ranges
 
-Rating Distribution: Analyzing the distribution of book ratings on the platform
+**Rating Distribution**: Analyzing the distribution of book ratings on the platform
 
-Book Title Analysis: Extracting and visualizing the most frequent words in book titles
+**Book Title Analysi**: Extracting and visualizing the most frequent words in book titles
