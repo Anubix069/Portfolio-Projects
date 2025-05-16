@@ -9,3 +9,4 @@ webdriver-manager
 seleniumbase
 urllib3
 requests
+six
