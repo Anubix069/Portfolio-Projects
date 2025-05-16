@@ -7,20 +7,24 @@ import re
 from collections import Counter
 from wordcloud import WordCloud
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 import time
 import warnings
-import requests
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.os_manager import ChromeType
+import plotly.express as px
 
 # ==== CONFIGURATION GÉNÉRALE ====
 st.set_page_config(page_title="Books to Scrape", layout="wide")
 st.title("📚 Books to Scrape - Dashboard")
 
-# === FONCTION DE CHARGEMENT CSV (depuis GitHub) ===
+# === FONCTION DE CHARGEMENT CSV (avec cache pour éviter la relecture fréquente) ===
 @st.cache_data
-def load_data_from_github():
-    url = "https://raw.githubusercontent.com/clementlabois/Portfolio-Projects/main/Project-3/Data/books_data.csv"
-    df = pd.read_csv(url)
-    return df
+def load_data():
+    if os.path.exists("data/books_data.csv"):
+        return pd.read_csv("data/books_data.csv")
+    else:
+        return pd.DataFrame()  # Retourner un DataFrame vide si le fichier n'existe pas
 
 # === SIDEBAR ===
 choix_browser = st.sidebar.selectbox("🔧 Sélectionner le navigateur", ["chrome"])
@@ -62,8 +66,8 @@ if choix == "📜 Présentation du projet":
 
 # === 2. Exploration des données ===
 elif choix == "🧑‍💻 Exploration des données":
-    st.subheader("🔍 Apperçu des données")
-    df = load_data_from_github()
+    st.subheader("🔍 Aperçu des données")
+    df = load_data()
     st.write(df.head(10))
 
     column_df = pd.DataFrame(df.columns, columns=["Nom des Colonnes"])
@@ -89,7 +93,7 @@ elif choix == "🧑‍💻 Exploration des données":
 # === 3. VISUALISATION SIMPLE ===
 elif choix == "📊 Visualisation simple":
     st.subheader("📈 Visualisations générales")
-    df = load_data_from_github()
+    df = load_data()
     df.rename(columns={"price": "Prix"}, inplace=True)
 
     # FILTRE PAR PRIX ET CATEGORIE (avec option 'All')
@@ -116,7 +120,7 @@ elif choix == "📊 Visualisation simple":
 elif choix == "📝 Visualisation textuelle":
     st.subheader("🔠 Analyse des titres des livres")
 
-    df = load_data_from_github()
+    df = load_data()
 
     text = " ".join(df['title'].dropna())
     wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
